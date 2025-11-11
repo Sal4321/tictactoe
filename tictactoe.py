@@ -115,7 +115,7 @@ class TicTacToe:
         for i in range(len(boardcopy)):
             if boardcopy[i] == ' ':
                 boardcopy[i] = 'O'
-                curval = self.statevalues[self.boards == boardcopy]
+                curval = self.statevalues[self.validstates == boardcopy]
                 if curval >= maxval:
                     maxval = i
                     boardcopy[i] = ' '
@@ -194,6 +194,6 @@ if __name__ == "__main__":
                 if tictac.check_winner(tictac.board):
                     i = i+1
                     print("Winner is: ",tictac.det_winner(tictac.board))
-                    tictac.updatestatevalues(movexo,winner = 'O') 
+   #                 tictac.updatestatevalues(movexo,winner = 'O') 
                     break
     # tictac.makemove(2,2,'O')
