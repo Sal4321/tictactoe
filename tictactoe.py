@@ -88,7 +88,7 @@ class TicTacToe:
                       
 
     def clearboard(self,board):
-        self.board = [" " for _ in range(9)]
+        self.board.clear
 
     # Print current state of the board
     def printboard(self):
@@ -109,20 +109,24 @@ class TicTacToe:
         
     
     def pickbest(self,board):
-        maxval = 1
-        boardcopy = self.board
+        maxval = 0
+        # create a shallow copy so modifications to boardcopy
+        # don't mutate the original self.board
+        boardcopy = self.board.copy()
         #find available options:
         for i in range(len(boardcopy)):
             if boardcopy[i] == ' ':
                 boardcopy[i] = 'O'
-                curval = self.statevalues[self.validstates == boardcopy]
-                if curval >= maxval:
-                    maxval = i
-                    boardcopy[i] = ' '
-                else:
-                    boardcopy[i] =' '
-                boardcopy[i] = 'O'   
-        return maxval          
+                try:
+                    state_index = self.validstates.index(tuple(boardcopy))
+                    curval = self.statevalues[state_index]
+                    if curval >= maxval:
+                        maxval = curval
+                        best_move = i
+                except ValueError:
+                    pass
+                boardcopy[i] = ' '
+        return best_move + 1 if 'best_move' in locals() else 1          
                     
                     
         
@@ -153,8 +157,8 @@ class TicTacToe:
 if __name__ == "__main__":
     tictac = TicTacToe()
     tictac.initializestatevalues()
-    sv = tictac.statevalues
-    vs = tictac.validstates
+ #   sv = tictac.statevalues
+ # vs = tictac.validstates
     movexo = []
     episodes = 1000
     # for i in range(1,episodes):
@@ -162,6 +166,7 @@ if __name__ == "__main__":
         print("Starting a new game")
         #clear the board
         tictac.clearboard(tictac)
+        movexo.clear
         print("\n")
         while True:
             try:
@@ -172,13 +177,20 @@ if __name__ == "__main__":
                     print(f"You entered: {number}")
                     ub = tictac.updateboard(number,'X')
                     if ub ==-1:
+                        available.clear()
                         break
                     movexo.append(number)
+                    available = [n for n in range(1, 10) if n not in movexo]
                     if tictac.check_winner(tictac.board):
                         i = i+1
                         print("Winner is: ",tictac.det_winner(tictac.board))
+                        available.clear()
           #              tictac.updatestatevalues(movexo,winner = 'X') # write this function
                         break
+                else:
+                    print("It's a draw!")
+                    available.clear()
+                    break   
                      # Exit the loop if the input is valid
             except ValueError:
                     print("Invalid input. Please enter a whole number.")
@@ -186,14 +198,21 @@ if __name__ == "__main__":
             if available:
                 chosen = tictac.pickbest(tictac.board)
                 movexo.append(chosen)
+                available = [n for n in range(1, 10) if n not in movexo]
                 print("The computer randomly chosen ",chosen)
                 tictac.updateboard(chosen,'O')
                 if ub ==-1:
+                    available.clear()
                     break
                 movexo.append(chosen)
                 if tictac.check_winner(tictac.board):
                     i = i+1
                     print("Winner is: ",tictac.det_winner(tictac.board))
    #                 tictac.updatestatevalues(movexo,winner = 'O') 
+                    available.clear()
                     break
+            else:
+                print("It's a draw!")
+                available.clear()
+                break
     # tictac.makemove(2,2,'O')
