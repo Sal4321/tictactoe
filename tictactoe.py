@@ -87,8 +87,8 @@ class TicTacToe:
         
                       
 
-    def clearboard(self,board):
-        self.board.clear
+    def clearboard(self):
+        self.board =[" " for _ in range(9)]
 
     # Print current state of the board
     def printboard(self):
@@ -165,8 +165,8 @@ if __name__ == "__main__":
     for i in range(1,episodes):
         print("Starting a new game")
         #clear the board
-        tictac.clearboard(tictac)
-        movexo.clear
+        tictac.clearboard()
+        movexo.clear()
         print("\n")
         while True:
             try:
@@ -183,7 +183,7 @@ if __name__ == "__main__":
                     available = [n for n in range(1, 10) if n not in movexo]
                     if tictac.check_winner(tictac.board):
                         i = i+1
-                        print("Winner is: ",tictac.det_winner(tictac.board))
+                        print("Winner is: ",tictac.det_winner(tictac.board)) 
                         available.clear()
           #              tictac.updatestatevalues(movexo,winner = 'X') # write this function
                         break
