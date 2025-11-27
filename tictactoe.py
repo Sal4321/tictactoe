@@ -69,7 +69,14 @@ class TicTacToe:
                     return board[a] # Return 'X' or 'O'
 
             
+    def update_state_value(self, current_state, next_state, reward, alpha=0.1):
+        current_idx = self.validstates.index(current_state)
+        next_idx = self.validstates.index(next_state)
     
+        # TD update: old_value + learning_rate * (reward + next_value - old_value)
+        self.statevalues[current_idx] += alpha * (
+        reward + self.statevalues[next_idx] - self.statevalues[current_idx]
+        )
     
     def initializestatevalues(self):
       for i in range(len(self.boards)):
@@ -97,14 +104,14 @@ class TicTacToe:
                 print('-' * 5)
             print(self.board[i], self.board[i+1], self.board[i+2])
         print("Above is the current board state")
-    def updateboard(self,x,move):
-        if x>= 1 and x<= 9 and self.board[x-1] ==' ':
-            self.board[x-1] = move
+    def updateboard(self, x, move):
+        if x >= 1 and x <= 9 and self.board[x - 1] == ' ':
+            self.board[x - 1] = move
             self.printboard()
-            return(1)
+            return 1
         else:
             print("Not a valid move! Please restart!")
-            return(-1)
+            return -1
      
         
     
@@ -161,13 +168,13 @@ if __name__ == "__main__":
  # vs = tictac.validstates
     movexo = []
     episodes = 1000
-    # for i in range(1,episodes):
-    for i in range(1,episodes):
+    # for i in range(1,episodes):  
+    for i in range(1, episodes):
         print("Starting a new game")
-        #clear the board
         tictac.clearboard()
         movexo.clear()
         print("\n")
+        prev_state = tictac.board.copy()
         while True:
             try:
                 available = [n for n in range(1, 10) if n not in movexo]
@@ -175,44 +182,52 @@ if __name__ == "__main__":
                     user_input = input("Please enter a number between 1 and 9: ")
                     number = int(user_input)
                     print(f"You entered: {number}")
-                    ub = tictac.updateboard(number,'X')
-                    if ub ==-1:
+                    ub = tictac.updateboard(number, 'X')
+                    if ub == -1:
                         available.clear()
                         break
                     movexo.append(number)
                     available = [n for n in range(1, 10) if n not in movexo]
                     if tictac.check_winner(tictac.board):
-                        i = i+1
-                        print("Winner is: ",tictac.det_winner(tictac.board)) 
+                        i = i + 1
+                        print("Winner is: ", tictac.det_winner(tictac.board))
+                        # Final TD update for human win
+                        tictac.update_state_value(tuple(prev_state), tuple(tictac.board), reward=-1)
                         available.clear()
-          #              tictac.updatestatevalues(movexo,winner = 'X') # write this function
                         break
                 else:
                     print("It's a draw!")
+                    # Final TD update for draw
+                    tictac.update_state_value(tuple(prev_state), tuple(tictac.board), reward=0.5)
                     available.clear()
-                    break   
-                     # Exit the loop if the input is valid
+                    break
             except ValueError:
-                    print("Invalid input. Please enter a whole number.")
-                #computer pick a random number between 1 and 9 
+                print("Invalid input. Please enter a whole number.")
+            # Computer move
             if available:
+                prev_state = tictac.board.copy()
                 chosen = tictac.pickbest(tictac.board)
                 movexo.append(chosen)
                 available = [n for n in range(1, 10) if n not in movexo]
-                print("The computer randomly chosen ",chosen)
-                tictac.updateboard(chosen,'O')
-                if ub ==-1:
+                print("The computer randomly chosen ", chosen)
+                ub = tictac.updateboard(chosen, 'O')
+                # TD update after computer move (reward=0 for ongoing)
+                tictac.update_state_value(tuple(prev_state), tuple(tictac.board), reward=0)
+                if ub == -1:
                     available.clear()
                     break
                 movexo.append(chosen)
                 if tictac.check_winner(tictac.board):
-                    i = i+1
-                    print("Winner is: ",tictac.det_winner(tictac.board))
-   #                 tictac.updatestatevalues(movexo,winner = 'O') 
+                    i = i + 1
+                    print("Winner is: ", tictac.det_winner(tictac.board))
+                    # Final TD update for computer win
+                    tictac.update_state_value(tuple(prev_state), tuple(tictac.board), reward=1)
                     available.clear()
                     break
             else:
                 print("It's a draw!")
+                # Final TD update for draw
+                tictac.update_state_value(tuple(prev_state), tuple(tictac.board), reward=0.5)
                 available.clear()
                 break
     # tictac.makemove(2,2,'O')
